@@ -6,23 +6,7 @@ import java.math.BigDecimal;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
- * JOIN TABLE for Many-to-Many relationship between Vehicle and Feature
- * 
- * EXPLANATION:
- * - This is the join table that breaks the Many-to-Many into two One-to-Many relationships
- * - It contains:
- *   - id (PK): Surrogate primary key
- *   - vehicle_id (FK): References the Vehicle table
- *   - feature_id (FK): References the Feature table
- *   - additionalCost: Extra attribute specific to this relationship
- * 
- * Why use a join table entity instead of @ManyToMany?
- * 1. Allows adding extra attributes (additionalCost)
- * 2. Provides more control over the relationship
- * 3. Easier to query and modify
- * 4. Follows database normalization principles
- */
+// Join entity for Vehicle <-> Feature with extra attribute
 @Entity
 @Table(name = "vehicle_feature", 
        uniqueConstraints = @UniqueConstraint(columnNames = {"vehicle_id", "feature_id"}))
