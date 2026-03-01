@@ -1,5 +1,5 @@
 package auca.ac.rw.carRentalHub.model.enums;
 
-public class EPaymentStatus {
-
+public enum EPaymentStatus {
+	PENDING, COMPLETED, FAILED, REFUNDED
 }

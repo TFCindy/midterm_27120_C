@@ -1,5 +1,5 @@
 package auca.ac.rw.carRentalHub.model.enums;
 
-public class EReservationStatus {
-
+public enum EReservationStatus {
+	PENDING, ACTIVE, COMPLETED, CANCELLED
 }

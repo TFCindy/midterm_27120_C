@@ -1,5 +1,5 @@
 package auca.ac.rw.carRentalHub.model.enums;
 
-public class ELocationType {
-
+public enum ELocationType {
+	PROVINCE, DISTRICT, SECTOR, CELL, VILLAGE
 }
