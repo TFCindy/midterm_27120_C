@@ -3,6 +3,7 @@ package auca.ac.rw.carRentalHub.model;
 import java.util.UUID;
 
 import auca.ac.rw.carRentalHub.model.enums.EPaymentStatus;
+import auca.ac.rw.carRentalHub.model.enums.EPaymentMethod;
 
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
