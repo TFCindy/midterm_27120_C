@@ -47,19 +47,49 @@ public class UserController {
     }
     
     /**
+     * ENDPOINT: GET /api/users
+     * Supports pagination and sorting: page,size,sortBy,direction
+     */
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "ASC") String direction) {
+
+        org.springframework.data.domain.Sort sort = direction.equalsIgnoreCase("DESC")
+                ? org.springframework.data.domain.Sort.by(sortBy).descending()
+                : org.springframework.data.domain.Sort.by(sortBy).ascending();
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, sort);
+
+        org.springframework.data.domain.Page<auca.ac.rw.carRentalHub.dto.UserDTO> pageResult = userService.getAllUsers(pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", pageResult.getContent());
+        response.put("currentPage", pageResult.getNumber());
+        response.put("totalItems", pageResult.getTotalElements());
+        response.put("totalPages", pageResult.getTotalPages());
+        response.put("pageSize", pageResult.getSize());
+        response.put("sortBy", sortBy);
+        response.put("sortDirection", direction);
+
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Test endpoint to check if a user exists by username
      * Demonstrates existsBy() method
      */
     @GetMapping("/check-exists")
     public ResponseEntity<Map<String, Boolean>> checkUserExists(
             @RequestParam String username) {
-        
-        // This uses the existsByUsername method from requirement #7
-        boolean exists = userRepository.existsByUsername(username);
-        
+        // Call service to check username existence
+        boolean exists = userService.existsByUsername(username);
+
         Map<String, Boolean> response = new HashMap<>();
         response.put("exists", exists);
-        
+
         return ResponseEntity.ok(response);
     }
 }

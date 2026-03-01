@@ -78,18 +78,16 @@ public class LocationService {
      * Validate the hierarchy based on location types
      */
     private boolean isValidHierarchy(ELocationType childType, ELocationType parentType) {
-        switch (childType) {
-            case DISTRICT:
-                return parentType == ELocationType.PROVINCE;
-            case SECTOR:
-                return parentType == ELocationType.DISTRICT;
-            case CELL:
-                return parentType == ELocationType.SECTOR;
-            case VILLAGE:
-                return parentType == ELocationType.CELL;
-            default:
-                return false;
+        if (childType == ELocationType.DISTRICT) {
+            return parentType == ELocationType.PROVINCE;
+        } else if (childType == ELocationType.SECTOR) {
+            return parentType == ELocationType.DISTRICT;
+        } else if (childType == ELocationType.CELL) {
+            return parentType == ELocationType.SECTOR;
+        } else if (childType == ELocationType.VILLAGE) {
+            return parentType == ELocationType.CELL;
         }
+        return false;
     }
 
     /**
