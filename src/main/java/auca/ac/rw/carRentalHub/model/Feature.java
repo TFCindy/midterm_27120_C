@@ -1,11 +1,18 @@
 package auca.ac.rw.carRentalHub.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
-import java.util.List;
-import java.math.BigDecimal;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "feature")
@@ -20,20 +27,16 @@ public class Feature {
 
     private String description;
 
-    private BigDecimal basePrice;
-
-    // One-to-Many with join table (VehicleFeature)
-    @OneToMany(mappedBy = "feature", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "features")
     @JsonIgnore
-    private List<VehicleFeature> vehicleFeatures;
+    private Set<Vehicle> vehicles = new HashSet<>();
 
     // Constructors
     public Feature() {}
 
-    public Feature(String name, String description, BigDecimal basePrice) {
+    public Feature(String name, String description) {
         this.name = name;
         this.description = description;
-        this.basePrice = basePrice;
     }
 
     // Getters and Setters
@@ -46,11 +49,11 @@ public class Feature {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public BigDecimal getBasePrice() { return basePrice; }
-    public void setBasePrice(BigDecimal basePrice) { this.basePrice = basePrice; }
+    public Set<Vehicle> getVehicles() {
+        return vehicles;
+    }
 
-    public List<VehicleFeature> getVehicleFeatures() { return vehicleFeatures; }
-    public void setVehicleFeatures(List<VehicleFeature> vehicleFeatures) { 
-        this.vehicleFeatures = vehicleFeatures; 
+    public void setVehicles(Set<Vehicle> vehicles) {
+        this.vehicles = vehicles;
     }
 }

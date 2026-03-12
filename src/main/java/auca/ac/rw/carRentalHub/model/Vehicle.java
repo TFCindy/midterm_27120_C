@@ -1,12 +1,27 @@
 package auca.ac.rw.carRentalHub.model;
 
-import java.util.UUID;
-import java.util.List;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import auca.ac.rw.carRentalHub.model.enums.EVehicleStatus;
 
@@ -34,9 +49,12 @@ public class Vehicle {
     @JsonIgnore
     private List<Reservation> reservations = new ArrayList<>();
 
-    // One-to-Many with VehicleFeature (join table for Many-to-Many with Feature)
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VehicleFeature> features = new ArrayList<>();
+    // Many-to-Many with Feature using join table vehicle_features
+    @ManyToMany
+    @JoinTable(name = "vehicle_features",
+            joinColumns = @JoinColumn(name = "vehicle_id"),
+            inverseJoinColumns = @JoinColumn(name = "feature_id"))
+    private Set<Feature> features = new HashSet<>();
 
     // Constructors
     public Vehicle() {}
@@ -49,25 +67,14 @@ public class Vehicle {
         this.status = EVehicleStatus.AVAILABLE;
     }
 
-    /**
-     * Helper method to add a feature to this vehicle
-     * This maintains both sides of the relationship
-     */
-    public void addFeature(Feature feature, BigDecimal additionalCost) {
-        VehicleFeature vehicleFeature = new VehicleFeature();
-        vehicleFeature.setVehicle(this);
-        vehicleFeature.setFeature(feature);
-        vehicleFeature.setAdditionalCost(additionalCost);
-        features.add(vehicleFeature);
-        feature.getVehicleFeatures().add(vehicleFeature);
+    public void addFeature(Feature feature) {
+        features.add(feature);
+        feature.getVehicles().add(this);
     }
 
-    /**
-     * Helper method to remove a feature from this vehicle
-     */
     public void removeFeature(Feature feature) {
-        features.removeIf(vf -> vf.getFeature().equals(feature));
-        feature.getVehicleFeatures().removeIf(vf -> vf.getVehicle().equals(this));
+        features.remove(feature);
+        feature.getVehicles().remove(this);
     }
 
     // Getters and Setters
@@ -97,6 +104,6 @@ public class Vehicle {
         this.reservations = reservations; 
     }
 
-    public List<VehicleFeature> getFeatures() { return features; }
-    public void setFeatures(List<VehicleFeature> features) { this.features = features; }
+    public Set<Feature> getFeatures() { return features; }
+    public void setFeatures(Set<Feature> features) { this.features = features; }
 }

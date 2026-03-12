@@ -63,12 +63,30 @@ The project demonstrates sorting and pagination in multiple endpoints:
 
 #### Many‑to‑Many with Join Table (Requirement #4)
 
-Your ERD models the many-to-many between `Vehicle` and `Feature` using an explicit join entity/table called `VehicleFeature`:
-- `Vehicle` (1) → (M) `VehicleFeature`
-- `Feature` (1) → (M) `VehicleFeature`
-- `VehicleFeature` stores the relationship and also includes `additionalCost`.
+The project now uses a literal `@ManyToMany` + `@JoinTable` mapping between `Vehicle` and `Feature`:
 
-This is the correct approach when the join table contains extra attributes (like `additionalCost`), and it matches the ERD exactly.
+- **Entities**: `Vehicle`, `Feature`
+- **Join table**: `vehicle_features(vehicle_id, feature_id)` with a composite key.
+
+In `Vehicle`:
+
+```java
+@ManyToMany
+@JoinTable(name = "vehicle_features",
+        joinColumns = @JoinColumn(name = "vehicle_id"),
+        inverseJoinColumns = @JoinColumn(name = "feature_id"))
+private Set<Feature> features = new HashSet<>();
+```
+
+In `Feature`:
+
+```java
+@ManyToMany(mappedBy = "features")
+@JsonIgnore
+private Set<Vehicle> vehicles = new HashSet<>();
+```
+
+This matches the ERD’s many‑to‑many between vehicles and features, with a dedicated join table that only stores the two foreign keys.
 
 #### One‑to‑Many & Many‑to‑One (Requirement #5)
 

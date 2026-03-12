@@ -1,7 +1,7 @@
 package auca.ac.rw.carRentalHub.service;
 
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,11 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import auca.ac.rw.carRentalHub.model.Vehicle;
 import auca.ac.rw.carRentalHub.model.Feature;
-import auca.ac.rw.carRentalHub.model.VehicleFeature;
-import auca.ac.rw.carRentalHub.repository.VehicleRepository;
+import auca.ac.rw.carRentalHub.model.Vehicle;
 import auca.ac.rw.carRentalHub.repository.FeatureRepository;
+import auca.ac.rw.carRentalHub.repository.VehicleRepository;
 
 @Service
 public class VehicleService {
@@ -37,18 +36,13 @@ public class VehicleService {
     }
 
     @Transactional
-    public Vehicle addFeatureToVehicle(UUID vehicleId, UUID featureId, java.math.BigDecimal additionalCost) {
-        Optional<Vehicle> opt = vehicleRepository.findById(vehicleId);
-        Optional<Feature> optF = featureRepository.findById(featureId);
-        if (opt.isEmpty()) {
-            throw new IllegalArgumentException("Vehicle not found");
-        }
-        if (optF.isEmpty()) {
-            throw new IllegalArgumentException("Feature not found");
-        }
-        Vehicle vehicle = opt.get();
-        Feature feature = optF.get();
-        vehicle.addFeature(feature, additionalCost == null ? java.math.BigDecimal.ZERO : additionalCost);
+    public Vehicle addFeatureToVehicle(UUID vehicleId, UUID featureId, java.math.BigDecimal ignoredAdditionalCost) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+        Feature feature = featureRepository.findById(featureId)
+                .orElseThrow(() -> new IllegalArgumentException("Feature not found"));
+
+        vehicle.addFeature(feature);
         return vehicleRepository.save(vehicle);
     }
 
