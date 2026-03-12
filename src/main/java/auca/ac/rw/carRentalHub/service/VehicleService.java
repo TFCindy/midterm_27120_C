@@ -25,7 +25,6 @@ public class VehicleService {
     private FeatureRepository featureRepository;
 
     public Vehicle saveVehicle(Vehicle vehicle) {
-        // simple save, could add validation later
         return vehicleRepository.save(vehicle);
     }
 
@@ -38,20 +37,19 @@ public class VehicleService {
     }
 
     @Transactional
-    public String addFeatureToVehicle(UUID vehicleId, UUID featureId, java.math.BigDecimal additionalCost) {
+    public Vehicle addFeatureToVehicle(UUID vehicleId, UUID featureId, java.math.BigDecimal additionalCost) {
         Optional<Vehicle> opt = vehicleRepository.findById(vehicleId);
         Optional<Feature> optF = featureRepository.findById(featureId);
         if (opt.isEmpty()) {
-            return "Vehicle not found";
+            throw new IllegalArgumentException("Vehicle not found");
         }
         if (optF.isEmpty()) {
-            return "Feature not found";
+            throw new IllegalArgumentException("Feature not found");
         }
         Vehicle vehicle = opt.get();
         Feature feature = optF.get();
         vehicle.addFeature(feature, additionalCost == null ? java.math.BigDecimal.ZERO : additionalCost);
-        vehicleRepository.save(vehicle);
-        return "Feature added";
+        return vehicleRepository.save(vehicle);
     }
 
     public Page<Vehicle> findByFeature(UUID featureId, Pageable pageable) {

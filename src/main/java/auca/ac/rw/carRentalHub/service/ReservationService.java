@@ -34,13 +34,13 @@ public class ReservationService {
     private PaymentRepository paymentRepository;
 
     public Reservation saveReservation(Reservation reservation, UUID customerId, UUID vehicleId) {
-        Optional<Customer> c = customerRepository.findById(customerId);
-        Optional<Vehicle> v = vehicleRepository.findById(vehicleId);
-        if (c.isEmpty() || v.isEmpty()) {
-            return null;
-        }
-        reservation.setCustomer(c.get());
-        reservation.setVehicle(v.get());
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+
+        reservation.setCustomer(customer);
+        reservation.setVehicle(vehicle);
         return reservationRepository.save(reservation);
     }
 
@@ -57,16 +57,16 @@ public class ReservationService {
     }
 
     @Transactional
-    public String addPayment(UUID reservationId, Payment payment) {
+    public Payment addPayment(UUID reservationId, Payment payment) {
         Optional<Reservation> r = reservationRepository.findById(reservationId);
         if (r.isEmpty()) {
-            return "Reservation not found";
+            throw new IllegalArgumentException("Reservation not found");
         }
         Reservation reservation = r.get();
         payment.setReservation(reservation);
         reservation.setPayment(payment);
-        paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
         reservationRepository.save(reservation);
-        return "Payment added";
+        return savedPayment;
     }
 }

@@ -4,26 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import auca.ac.rw.carRentalHub.model.enums.EReservationStatus;
+public class ReservationRequest {
 
-public class ReservationDTO {
-
-    private UUID id;
     private String reservationNumber;
     private LocalDate pickupDate;
     private LocalDate returnDate;
     private BigDecimal totalAmount;
-    private EReservationStatus status;
     private UUID customerId;
     private UUID vehicleId;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getReservationNumber() {
         return reservationNumber;
@@ -57,14 +45,6 @@ public class ReservationDTO {
         this.totalAmount = totalAmount;
     }
 
-    public EReservationStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(EReservationStatus status) {
-        this.status = status;
-    }
-
     public UUID getCustomerId() {
         return customerId;
     }
@@ -81,3 +61,4 @@ public class ReservationDTO {
         this.vehicleId = vehicleId;
     }
 }
+

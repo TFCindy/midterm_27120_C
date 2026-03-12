@@ -20,67 +20,40 @@ public class LocationService {
     private LocationRepository locationRepository;
 
     /**
-     * Save a location with parent relationship
-     * This implements requirement #2: Saving Location
-     * 
-     * EXPLANATION:
-     * - The data is stored in the "location" table
-     * - Parent relationship is handled via parent_id foreign key
-     * - If parentId is provided, we find the parent location and set it
-     * - This creates the hierarchy: Province → District → Sector → Cell → Village
+     * Save a location with parent relationship.
+     * Throws IllegalArgumentException on validation errors so controllers can
+     * return consistent error responses via GlobalExceptionHandler.
      */
     @Transactional
-    public String saveLocation(Location location, String parentId) {
-        // keep old behavior for backward compatibility
-        return saveChildAndParent(location, parentId);
-    }
-
-    /**
-     * Method signature matching example service name. Does the same work.
-     */
-    @Transactional
-    public String saveChildAndParent(Location location, String parentId) {
-        try {
-            // Check if location with same code already exists
-            if (locationRepository.existsByCode(location.getCode())) {
-                return "Location with code '" + location.getCode() + "' already exists!";
-            }
-
-            // Handle parent relationship if parentId is provided
-            if (parentId != null && !parentId.isEmpty()) {
-                UUID parentUUID = UUID.fromString(parentId);
-                Location parent = locationRepository.findById(parentUUID).orElse(null);
-                
-                if (parent != null) {
-                    // Validate hierarchy (e.g., District can only have Province as parent)
-                    if (!isValidHierarchy(location.getType(), parent.getType())) {
-                        return "Invalid hierarchy: A " + location.getType() + 
-                               " cannot have a " + parent.getType() + " as parent!";
-                    }
-                    location.setParent(parent);
-                } else {
-                    return "Parent location with ID '" + parentId + "' not found!";
-                }
-            } else {
-                // If no parent, this should be a PROVINCE (top level)
-                if (location.getType() != ELocationType.PROVINCE) {
-                    return "Only PROVINCE can have no parent. " + 
-                           location.getType() + " must have a parent!";
-                }
-                location.setParent(null);
-            }
-
-            // Save the location
-            locationRepository.save(location);
-            
-            return String.format("Location '%s' (%s) saved successfully!", 
-                   location.getName(), location.getType());
-            
-        } catch (IllegalArgumentException e) {
-            return "Invalid UUID format for parentId: " + parentId;
-        } catch (Exception e) {
-            return "Error saving location: " + e.getMessage();
+    public Location saveLocation(Location location, UUID parentId) {
+        // Check if location with same code already exists
+        if (locationRepository.existsByCode(location.getCode())) {
+            throw new IllegalArgumentException(
+                    "Location with code '" + location.getCode() + "' already exists");
         }
+
+        // Handle parent relationship if parentId is provided
+        if (parentId != null) {
+            Location parent = locationRepository.findById(parentId)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Parent location with ID '" + parentId + "' not found"));
+
+            if (!isValidHierarchy(location.getType(), parent.getType())) {
+                throw new IllegalArgumentException(
+                        "Invalid hierarchy: A " + location.getType() + " cannot have a " + parent.getType()
+                                + " as parent");
+            }
+            location.setParent(parent);
+        } else {
+            // If no parent, this should be a PROVINCE (top level)
+            if (location.getType() != ELocationType.PROVINCE) {
+                throw new IllegalArgumentException(
+                        "Only PROVINCE can have no parent. " + location.getType() + " must have a parent");
+            }
+            location.setParent(null);
+        }
+
+        return locationRepository.save(location);
     }
 
     /**

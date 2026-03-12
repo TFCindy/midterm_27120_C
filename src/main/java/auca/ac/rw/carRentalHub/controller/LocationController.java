@@ -10,12 +10,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import auca.ac.rw.carRentalHub.dto.LocationDTO;
+import auca.ac.rw.carRentalHub.dto.LocationRequest;
 import auca.ac.rw.carRentalHub.model.Location;
 import auca.ac.rw.carRentalHub.service.LocationService;
 
@@ -28,29 +34,22 @@ public class LocationController {
 
     /**
      * ENDPOINT: POST /api/locations/save
-     * BODY: {
-     *   "code": "RW-01",
-     *   "name": "Kigali City",
-     *   "type": "PROVINCE"
-     * }
-     * 
-     * For child locations, add parentId parameter:
-     * POST /api/locations/save?parentId=123e4567-e89b-12d3-a456-426614174000
+     * BODY (DTO):
+     * { "code": "RW-01", "name": "Kigali City", "type": "PROVINCE", "parentId": null }
      */
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> saveLocation(
-            @RequestBody Location location,
-            @RequestParam(required = false) String parentId) {
-        
-        // call service method matching example name
-        String result = locationService.saveChildAndParent(location, parentId);
+    public ResponseEntity<LocationDTO> saveLocation(@RequestBody LocationRequest request) {
 
-        if (result.contains("successfully")) {
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(result, HttpStatus.CONFLICT);
-        }
+        Location location = new Location();
+        location.setCode(request.getCode());
+        location.setName(request.getName());
+        location.setType(request.getType());
+
+        Location saved = locationService.saveLocation(location, request.getParentId());
+
+        LocationDTO dto = toDto(saved);
+        return ResponseEntity.status(201).body(dto);
     }
 
     /**
@@ -72,7 +71,7 @@ public class LocationController {
         Page<Location> locationPage = locationService.getAllLocations(pageable);
         
         Map<String, Object> response = new HashMap<>();
-        response.put("locations", locationPage.getContent());
+        response.put("locations", locationPage.map(this::toDto).getContent());
         response.put("currentPage", locationPage.getNumber());
         response.put("totalItems", locationPage.getTotalElements());
         response.put("totalPages", locationPage.getTotalPages());
@@ -88,8 +87,12 @@ public class LocationController {
      * Get all provinces
      */
     @GetMapping("/provinces")
-    public ResponseEntity<List<Location>> getAllProvinces() {
-        return ResponseEntity.ok(locationService.getAllProvinces());
+    public ResponseEntity<List<LocationDTO>> getAllProvinces() {
+        List<LocationDTO> dtos = locationService.getAllProvinces()
+                .stream()
+                .map(this::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -97,8 +100,12 @@ public class LocationController {
      * Get all children of a location
      */
     @GetMapping("/{id}/children")
-    public ResponseEntity<List<Location>> getChildren(@PathVariable UUID id) {
-        return ResponseEntity.ok(locationService.getChildren(id));
+    public ResponseEntity<List<LocationDTO>> getChildren(@PathVariable UUID id) {
+        List<LocationDTO> dtos = locationService.getChildren(id)
+                .stream()
+                .map(this::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}/descendants")
@@ -112,5 +119,15 @@ public class LocationController {
         Map<String, String> response = new HashMap<>();
         response.put("address", address);
         return ResponseEntity.ok(response);
+    }
+
+    private LocationDTO toDto(Location location) {
+        LocationDTO dto = new LocationDTO(location.getId(), location.getCode(), location.getName(),
+                location.getType().name());
+        if (location.getParent() != null) {
+            dto.setParentId(location.getParent().getId().toString());
+            dto.setParentName(location.getParent().getName());
+        }
+        return dto;
     }
 }
