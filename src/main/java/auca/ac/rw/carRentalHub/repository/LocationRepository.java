@@ -36,4 +36,15 @@ public interface LocationRepository extends JpaRepository<Location, UUID> {
     // Find location by code or name (for requirement #8)
     @Query("SELECT l FROM Location l WHERE l.code = :identifier OR l.name = :identifier")
     Location findByIdentifier(@Param("identifier") String identifier);
+
+    @Query(value = """
+            WITH RECURSIVE location_tree AS (
+                SELECT id, name, type, parent_id FROM location WHERE id = :parentId
+                UNION ALL
+                SELECT l.id, l.name, l.type, l.parent_id FROM location l
+                INNER JOIN location_tree lt ON l.parent_id = lt.id
+            )
+            SELECT id FROM location_tree
+            """, nativeQuery = true)
+    List<UUID> findAllDescendantIds(@Param("parentId") UUID parentId);
 }

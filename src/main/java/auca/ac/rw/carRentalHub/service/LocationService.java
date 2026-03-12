@@ -1,7 +1,7 @@
 package auca.ac.rw.carRentalHub.service;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -119,5 +119,34 @@ public class LocationService {
      */
     public List<Location> getChildren(UUID parentId) {
         return locationRepository.findChildrenByParentId(parentId);
+    }
+
+    /**
+     * Get all descendant locations for a given parent (including the parent itself).
+     * Uses a recursive CTE in the repository to efficiently traverse the hierarchy.
+     */
+    public List<UUID> getAllDescendantIds(UUID parentId) {
+        return locationRepository.findAllDescendantIds(parentId);
+    }
+
+    /**
+     * Build a human-readable full address by walking up the parent chain.
+     */
+    public String getFullAddress(UUID locationId) {
+        Location location = locationRepository.findById(locationId).orElse(null);
+        if (location == null) {
+            return "Location not found";
+        }
+
+        StringBuilder address = new StringBuilder();
+        address.append(location.getName());
+
+        Location current = location.getParent();
+        while (current != null) {
+            address.insert(0, current.getName() + " > ");
+            current = current.getParent();
+        }
+
+        return address.toString();
     }
 }

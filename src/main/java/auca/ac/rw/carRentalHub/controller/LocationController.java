@@ -100,4 +100,17 @@ public class LocationController {
     public ResponseEntity<List<Location>> getChildren(@PathVariable UUID id) {
         return ResponseEntity.ok(locationService.getChildren(id));
     }
+
+    @GetMapping("/{id}/descendants")
+    public ResponseEntity<List<UUID>> getAllDescendants(@PathVariable UUID id) {
+        return ResponseEntity.ok(locationService.getAllDescendantIds(id));
+    }
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<Map<String, String>> getFullAddress(@PathVariable UUID id) {
+        String address = locationService.getFullAddress(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("address", address);
+        return ResponseEntity.ok(response);
+    }
 }
