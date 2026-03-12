@@ -63,18 +63,12 @@ The project demonstrates sorting and pagination in multiple endpoints:
 
 #### Many‑to‑Many with Join Table (Requirement #4)
 
-- **Entities**: `Role` and `Permission`
-- **Mapping**:
-  - In `Role`:
-    - `@ManyToMany`
-    - `@JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))`
-  - In `Permission`:
-    - `@ManyToMany(mappedBy = "permissions")`
-- This creates a **join table** `role_permissions(role_id, permission_id)` implementing a Many‑to‑Many relationship between roles and permissions.
+Your ERD models the many-to-many between `Vehicle` and `Feature` using an explicit join entity/table called `VehicleFeature`:
+- `Vehicle` (1) → (M) `VehicleFeature`
+- `Feature` (1) → (M) `VehicleFeature`
+- `VehicleFeature` stores the relationship and also includes `additionalCost`.
 
-The project also contains a Many‑to‑Many domain modeled with an explicit join entity:
-- `Vehicle` ← `@OneToMany` → `VehicleFeature` ← `@ManyToOne` → `Feature`
-- `VehicleFeature` holds extra attribute `additionalCost`, representing a Many‑to‑Many relationship between `Vehicle` and `Feature` with additional data.
+This is the correct approach when the join table contains extra attributes (like `additionalCost`), and it matches the ERD exactly.
 
 #### One‑to‑Many & Many‑to‑One (Requirement #5)
 
@@ -131,7 +125,7 @@ The controller `GET /api/users/check-exists?username=...` demonstrates how to ex
 
 Implementation:
 - `LocationRepository.findByIdentifier(String identifier)` finds a location by code or name.
-- `LocationRepository.findAllDescendantsRaw(UUID parentId)` uses a recursive CTE to get the full subtree of locations starting from a parent.
+- `LocationRepository.findAllDescendantIds(UUID parentId)` uses a recursive CTE to get the full subtree location IDs starting from a parent.
 - `UserRepository.findByLocationIdIn(List<UUID> locationIds)` returns all users whose `location_id` is in the given list.
 - `UserService.getUsersByProvince(String identifier)`:
   - Resolves the province by code or name.
