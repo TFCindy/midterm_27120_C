@@ -292,7 +292,32 @@ Through the `Location` parent chain (`village → cell → sector → district �
 
 ---
 
-### 8. How to Run the Project
+### 8. API Testing with Postman
+
+Below are screenshots demonstrating successful API testing of all endpoints:
+
+#### Location Hierarchy Creation
+- ![Create Province](screenshots/01-province-kigali.png)
+- ![Create District](screenshots/02-district-gasabo.png)  
+- ![Create Sector](screenshots/03-sector-kacyiru.png)
+- ![Create Cell](screenshots/04-cell-kanserege.png)
+- ![Create Village](screenshots/05-village-urugero.png)
+
+#### Location Retrieval
+- ![Get All Locations](screenshots/06-all-locations.png)
+- ![Get Location by ID](screenshots/07-urugero-by-id.png)
+
+#### User and Role Management
+- ![Create Role](screenshots/08-create-role-customer.png)
+- ![Create User](screenshots/09-create-user-urugero.png)
+
+#### User Queries
+- ![Users by Province](screenshots/10-users-by-province-code.png)
+- ![Check User Exists](screenshots/11-check-user-exists.png)
+
+---
+
+### 9. How to Run the Project
 
 1. **Prerequisites**
    - Java 17+
